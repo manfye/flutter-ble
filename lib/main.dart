@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
+import "dart:typed_data";
 
 void main() => runApp(MyApp());
 
@@ -57,6 +59,36 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     });
     widget.flutterBlue.startScan();
+  }
+
+  _testBytes() {
+    String foo = 'Hello world';
+// Runes runes = foo.runes;
+// or
+    Iterable<int> bytes2 = foo.codeUnits;
+    print(bytes2);
+    bytesToInteger();
+    bytesToHexString();
+  }
+
+  uint16ToByte() {}
+  bytesToInteger() {
+    var value = 0;
+    //1343232275
+    List<int> bytes = [19, 25, 16, 80];
+    for (var i = 0, length = bytes.length; i < length; i++) {
+      value += bytes[i] * pow(256, i);
+    }
+
+    print(value);
+  }
+
+  bytesToHexString() {
+    // List<int> bytes2 = [69, 83, 89, 77, 83, 69, 84]; 00002a00-0000-1000-8000-00805f9b34fb
+    List<int> bytes2 = [16, 0, 32, 0, 0, 0, 144, 1];
+
+    String bar = utf8.decode(bytes2);
+    print(bar);
   }
 
   ListView _buildListViewOfDevices() {
@@ -275,6 +307,13 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
           title: Text(widget.title),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            _testBytes();
+          },
+          child: Icon(Icons.navigation),
+          backgroundColor: Colors.green,
         ),
         body: _buildView(),
       );
