@@ -61,6 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
     widget.flutterBlue.startScan();
   }
 
+//https://thingsboard.io/docs/iot-gateway/guides/how-to-connect-ble-sensor-using-gateway/
   _testBytes() {
     String foo = 'Hello world';
 // Runes runes = foo.runes;
