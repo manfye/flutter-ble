@@ -160,6 +160,7 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Text('READ', style: TextStyle(color: Colors.white)),
               onPressed: () async {
                 var sub = characteristic.value.listen((value) {
+                  print(value);
                   print(widget.readValues[characteristic.uuid]);
                   setState(() {
                     widget.readValues[characteristic.uuid] = value;
