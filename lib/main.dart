@@ -68,15 +68,15 @@ class _MyHomePageState extends State<MyHomePage> {
 // or
     Iterable<int> bytes2 = foo.codeUnits;
     print(bytes2);
-    bytesToInteger();
+    // bytesToInteger();
     bytesToHexString();
   }
 
   uint16ToByte() {}
-  bytesToInteger() {
+  bytesToInteger(t1, t2) {
     var value = 0;
     //1343232275
-    List<int> bytes = [19, 25, 16, 80];
+    List<int> bytes = [t1, t2];
     for (var i = 0, length = bytes.length; i < length; i++) {
       value += bytes[i] * pow(256, i);
     }
@@ -95,45 +95,52 @@ class _MyHomePageState extends State<MyHomePage> {
   ListView _buildListViewOfDevices() {
     List<Container> containers = new List<Container>();
     for (BluetoothDevice device in widget.devicesList) {
-      containers.add(
-        Container(
-          height: 50,
-          child: Row(
-            children: <Widget>[
-              Expanded(
-                child: Column(
+      device.type.toString() == "BluetoothDeviceType.le"
+          ? containers.add(
+              Container(
+                height: 50,
+                child: Row(
                   children: <Widget>[
-                    Text(device.name == '' ? '(unknown device)' : device.name),
-                    Text(device.id.toString()),
+                    Expanded(
+                      child: Column(
+                        children: <Widget>[
+                          Text(device.name == ''
+                              ? '(unknown device)'
+                              : device.name),
+                          Text(device.id.toString()),
+                          Text(device.type.toString()),
+                        ],
+                      ),
+                    ),
+                    FlatButton(
+                      color: Colors.blue,
+                      child: Text(
+                        'Connect',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      onPressed: () async {
+                        widget.flutterBlue.stopScan();
+                        try {
+                          await device.connect();
+                        } catch (e) {
+                          if (e.code != 'already_connected') {
+                            throw e;
+                          }
+                        } finally {
+                          _services = await device.discoverServices();
+                        }
+                        setState(() {
+                          _connectedDevice = device;
+                        });
+                      },
+                    ),
                   ],
                 ),
               ),
-              FlatButton(
-                color: Colors.blue,
-                child: Text(
-                  'Connect',
-                  style: TextStyle(color: Colors.white),
-                ),
-                onPressed: () async {
-                  widget.flutterBlue.stopScan();
-                  try {
-                    await device.connect();
-                  } catch (e) {
-                    if (e.code != 'already_connected') {
-                      throw e;
-                    }
-                  } finally {
-                    _services = await device.discoverServices();
-                  }
-                  setState(() {
-                    _connectedDevice = device;
-                  });
-                },
-              ),
-            ],
-          ),
-        ),
-      );
+            )
+          : SizedBox(
+              height: 0,
+            );
     }
 
     return ListView(
@@ -148,80 +155,82 @@ class _MyHomePageState extends State<MyHomePage> {
       BluetoothCharacteristic characteristic) {
     List<ButtonTheme> buttons = new List<ButtonTheme>();
 
-    if (characteristic.properties.read) {
-      buttons.add(
-        ButtonTheme(
-          minWidth: 10,
-          height: 20,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: RaisedButton(
-              color: Colors.blue,
-              child: Text('READ', style: TextStyle(color: Colors.white)),
-              onPressed: () async {
-                var sub = characteristic.value.listen((value) {
-                  print(value);
-                  print(widget.readValues[characteristic.uuid]);
-                  setState(() {
-                    widget.readValues[characteristic.uuid] = value;
-                  });
-                });
-                await characteristic.read();
-                sub.cancel();
-              },
-            ),
-          ),
-        ),
-      );
-    }
-    if (characteristic.properties.write) {
-      buttons.add(
-        ButtonTheme(
-          minWidth: 10,
-          height: 20,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: RaisedButton(
-              child: Text('WRITE', style: TextStyle(color: Colors.white)),
-              onPressed: () async {
-                await showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: Text("Write"),
-                        content: Row(
-                          children: <Widget>[
-                            Expanded(
-                              child: TextField(
-                                controller: _writeController,
-                              ),
-                            ),
-                          ],
-                        ),
-                        actions: <Widget>[
-                          FlatButton(
-                            child: Text("Send"),
-                            onPressed: () {
-                              characteristic.write(
-                                  utf8.encode(_writeController.value.text));
-                              Navigator.pop(context);
-                            },
-                          ),
-                          FlatButton(
-                            child: Text("Cancel"),
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                          ),
-                        ],
-                      );
-                    });
-              },
-            ),
-          ),
-        ),
-      );
-    }
+    // if (characteristic.properties.read) {
+    //   buttons.add(
+    //     ButtonTheme(
+    //       minWidth: 10,
+    //       height: 20,
+    //       child: Padding(
+    //         padding: const EdgeInsets.symmetric(horizontal: 4),
+    //         child: RaisedButton(
+    //           color: Colors.blue,
+    //           child: Text('READ', style: TextStyle(color: Colors.white)),
+    //           onPressed: () async {
+    //             var sub = characteristic.value.listen((value) {
+    //               print(characteristic.uuid);
+    //               print(value);
+    //               print(widget.flutterBlue.connectedDevices);
+    //               print(widget.readValues[characteristic.uuid]);
+    //               setState(() {
+    //                 widget.readValues[characteristic.uuid] = value;
+    //               });
+    //             });
+    //             await characteristic.read();
+    //             sub.cancel();
+    //           },
+    //         ),
+    //       ),
+    //     ),
+    //   );
+    // }
+    // if (characteristic.properties.write) {
+    //   buttons.add(
+    //     ButtonTheme(
+    //       minWidth: 10,
+    //       height: 20,
+    //       child: Padding(
+    //         padding: const EdgeInsets.symmetric(horizontal: 4),
+    //         child: RaisedButton(
+    //           child: Text('WRITE', style: TextStyle(color: Colors.white)),
+    //           onPressed: () async {
+    //             await showDialog(
+    //                 context: context,
+    //                 builder: (BuildContext context) {
+    //                   return AlertDialog(
+    //                     title: Text("Write"),
+    //                     content: Row(
+    //                       children: <Widget>[
+    //                         Expanded(
+    //                           child: TextField(
+    //                             controller: _writeController,
+    //                           ),
+    //                         ),
+    //                       ],
+    //                     ),
+    //                     actions: <Widget>[
+    //                       FlatButton(
+    //                         child: Text("Send"),
+    //                         onPressed: () {
+    //                           characteristic.write(
+    //                               utf8.encode(_writeController.value.text));
+    //                           Navigator.pop(context);
+    //                         },
+    //                       ),
+    //                       FlatButton(
+    //                         child: Text("Cancel"),
+    //                         onPressed: () {
+    //                           Navigator.pop(context);
+    //                         },
+    //                       ),
+    //                     ],
+    //                   );
+    //                 });
+    //           },
+    //         ),
+    //       ),
+    //     ),
+    //   );
+    // }
     if (characteristic.properties.notify) {
       buttons.add(
         ButtonTheme(
@@ -234,7 +243,14 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: () async {
                 characteristic.value.listen((value) {
                   widget.readValues[characteristic.uuid] = value;
+                  print(value);
+                  print(value[0]);
+                  bytesToInteger(value[0], value[1]);
+                  setState(() {
+                    widget.readValues[characteristic.uuid] = value;
+                  });
                 });
+
                 await characteristic.setNotifyValue(true);
               },
             ),
@@ -312,7 +328,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            _testBytes();
+            // bytesToInteger();
           },
           child: Icon(Icons.navigation),
           backgroundColor: Colors.green,
