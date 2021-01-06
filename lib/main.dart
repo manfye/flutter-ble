@@ -269,41 +269,50 @@ class _MyHomePageState extends State<MyHomePage> {
       List<Widget> characteristicsWidget = new List<Widget>();
 
       for (BluetoothCharacteristic characteristic in service.characteristics) {
-        characteristicsWidget.add(
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Column(
-              children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    Text(characteristic.uuid.toString(),
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                  ],
+        characteristic.uuid.toString() == "ebe0ccc1-7a0a-4b0c-8a1a-6ff2997da3a6"
+            ? characteristicsWidget.add(
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Column(
+                    children: <Widget>[
+                      Row(
+                        children: <Widget>[
+                          Text(characteristic.uuid.toString(),
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                      Row(
+                        children: <Widget>[
+                          ..._buildReadWriteNotifyButton(characteristic),
+                        ],
+                      ),
+                      Row(
+                        children: <Widget>[
+                          Text('Value: ' +
+                              widget.readValues[characteristic.uuid]
+                                  .toString()),
+                        ],
+                      ),
+                      Divider(),
+                    ],
+                  ),
                 ),
-                Row(
-                  children: <Widget>[
-                    ..._buildReadWriteNotifyButton(characteristic),
-                  ],
-                ),
-                Row(
-                  children: <Widget>[
-                    Text('Value: ' +
-                        widget.readValues[characteristic.uuid].toString()),
-                  ],
-                ),
-                Divider(),
-              ],
-            ),
-          ),
-        );
+              )
+            : SizedBox(
+                height: 0,
+              );
       }
-      containers.add(
-        Container(
-          child: ExpansionTile(
-              title: Text(service.uuid.toString()),
-              children: characteristicsWidget),
-        ),
-      );
+      service.uuid.toString() == "ebe0ccb0-7a0a-4b0c-8a1a-6ff2997da3a6"
+          ? containers.add(
+              Container(
+                child: ExpansionTile(
+                    title: Text(service.uuid.toString()),
+                    children: characteristicsWidget),
+              ),
+            )
+          : SizedBox(
+              height: 0,
+            );
     }
 
     return ListView(
